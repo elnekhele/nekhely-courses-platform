@@ -24,7 +24,8 @@ export default async function CoursePage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const course = await prisma.course.findUnique({
     where: { slug },
     include: {
