@@ -55,9 +55,18 @@ export async function POST(req: Request) {
   let discount = 0;
   let coupon = null as Awaited<ReturnType<typeof prisma.coupon.findUnique>>;
   if (couponCode) {
-    coupon = await prisma.coupon.findUnique({ where: { code: couponCode } });
-    if (coupon && coupon.active && (!coupon.expiresAt || coupon.expiresAt > new Date())) {
+    coupon = await prisma.coupon.findUnique({
+      where: { code: couponCode.toUpperCase() },
+    });
+    const valid =
+      coupon &&
+      coupon.active &&
+      (!coupon.expiresAt || coupon.expiresAt > new Date()) &&
+      (coupon.maxUses == null || coupon.used < coupon.maxUses);
+    if (valid && coupon) {
       discount = Math.round((subtotal * coupon.percentOff) / 100);
+    } else {
+      coupon = null;
     }
   }
   const total = Math.max(0, subtotal - discount);

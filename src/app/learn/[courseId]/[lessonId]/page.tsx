@@ -33,7 +33,9 @@ export default async function LearnPage({
   });
   if (!course) notFound();
 
-  const lesson = await prisma.lesson.findUnique({ where: { id: lessonId } });
+  const lesson = await prisma.lesson.findFirst({
+    where: { id: lessonId, section: { courseId } },
+  });
   if (!lesson) notFound();
 
   const progress = await prisma.lessonProgress.findMany({
