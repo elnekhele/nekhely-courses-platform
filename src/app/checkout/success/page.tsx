@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
 import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function SuccessPage({
@@ -10,12 +12,14 @@ export default async function SuccessPage({
   searchParams: Promise<{ orderId?: string }>;
 }) {
   const { orderId } = await searchParams;
-  const order = orderId
-    ? await prisma.order.findUnique({
-        where: { id: orderId },
-        include: { items: { include: { course: true } } },
-      })
-    : null;
+  const session = await getServerSession(authOptions);
+  const order =
+    orderId && session?.user?.id
+      ? await prisma.order.findFirst({
+          where: { id: orderId, userId: session.user.id },
+          include: { items: { include: { course: true } } },
+        })
+      : null;
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-xl">

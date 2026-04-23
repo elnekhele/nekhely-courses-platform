@@ -44,7 +44,7 @@ export function ReviewsSection({
       return;
     }
     const newReview = (await res.json()) as Review;
-    setReviews((prev) => [newReview, ...prev.filter((r) => r.user.name !== newReview.user.name)]);
+    setReviews((prev) => [newReview, ...prev.filter((r) => r.id !== newReview.id)]);
     setComment("");
     toast({ title: "شكراً على تقييمك", tone: "success" });
   }
