@@ -24,6 +24,12 @@ export async function POST(
   });
   if (!quiz) return NextResponse.json({ error: "اختبار غير موجود" }, { status: 404 });
 
+  const enrollment = await prisma.enrollment.findUnique({
+    where: { userId_courseId: { userId: session.user.id, courseId: quiz.courseId } },
+  });
+  if (!enrollment)
+    return NextResponse.json({ error: "يجب الاشتراك في الدورة أولاً" }, { status: 403 });
+
   let correct = 0;
   for (const q of quiz.questions) {
     if (parsed.data.answers[q.id] === q.answer) correct++;

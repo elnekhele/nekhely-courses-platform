@@ -52,26 +52,28 @@ export async function POST(req: Request) {
     0,
   );
 
-  let discount = 0;
-  let coupon = null as Awaited<ReturnType<typeof prisma.coupon.findUnique>>;
-  if (couponCode) {
-    coupon = await prisma.coupon.findUnique({
-      where: { code: couponCode.toUpperCase() },
-    });
-    const valid =
-      coupon &&
-      coupon.active &&
-      (!coupon.expiresAt || coupon.expiresAt > new Date()) &&
-      (coupon.maxUses == null || coupon.used < coupon.maxUses);
-    if (valid && coupon) {
-      discount = Math.round((subtotal * coupon.percentOff) / 100);
-    } else {
-      coupon = null;
-    }
-  }
-  const total = Math.max(0, subtotal - discount);
-
   const order = await prisma.$transaction(async (tx) => {
+    // Re-read + validate coupon inside the transaction so that maxUses cannot
+    // be exceeded by concurrent checkouts (each tx gets a consistent view).
+    let discount = 0;
+    let coupon: Awaited<ReturnType<typeof tx.coupon.findUnique>> = null;
+    if (couponCode) {
+      coupon = await tx.coupon.findUnique({
+        where: { code: couponCode.toUpperCase() },
+      });
+      const valid =
+        coupon &&
+        coupon.active &&
+        (!coupon.expiresAt || coupon.expiresAt > new Date()) &&
+        (coupon.maxUses == null || coupon.used < coupon.maxUses);
+      if (valid && coupon) {
+        discount = Math.round((subtotal * coupon.percentOff) / 100);
+      } else {
+        coupon = null;
+      }
+    }
+    const total = Math.max(0, subtotal - discount);
+
     const o = await tx.order.create({
       data: {
         userId: session.user.id,

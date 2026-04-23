@@ -21,6 +21,13 @@ export async function POST(req: Request) {
   });
   if (!enrollment) return NextResponse.json({ error: "ليس لديك اشتراك" }, { status: 403 });
 
+  const lesson = await prisma.lesson.findFirst({
+    where: { id: lessonId, section: { courseId } },
+    select: { id: true },
+  });
+  if (!lesson)
+    return NextResponse.json({ error: "الدرس غير موجود في هذه الدورة" }, { status: 400 });
+
   await prisma.lessonProgress.upsert({
     where: { userId_lessonId: { userId: session.user.id, lessonId } },
     create: {

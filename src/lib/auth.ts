@@ -56,10 +56,27 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = (user as { id: string }).id;
         token.role = (user as { role?: string }).role ?? "STUDENT";
+        return token;
+      }
+      // Refresh role from DB on update events and at most once per minute
+      // so a demoted admin loses privileges without waiting for logout.
+      const ROLE_TTL_MS = 60_000;
+      const lastFetched =
+        (token as { roleFetchedAt?: number }).roleFetchedAt ?? 0;
+      const stale = Date.now() - lastFetched > ROLE_TTL_MS;
+      if (token.id && (trigger === "update" || stale)) {
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true },
+        });
+        if (fresh) {
+          token.role = fresh.role;
+          (token as { roleFetchedAt?: number }).roleFetchedAt = Date.now();
+        }
       }
       return token;
     },
