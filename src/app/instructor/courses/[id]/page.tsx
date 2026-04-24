@@ -51,6 +51,8 @@ export default async function EditCoursePage({
             id: l.id,
             title: l.title,
             videoUrl: l.videoUrl,
+            videoProvider: l.videoProvider,
+            videoUid: l.videoUid,
             durationMinutes: l.durationMinutes,
             order: l.order,
             isPreview: l.isPreview,
