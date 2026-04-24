@@ -131,7 +131,27 @@ npm run db:seed
 
 ---
 
-## 8. Going fully production — تحضيرات نهائية للإنتاج
+## 8. Enable protected video uploads — تفعيل رفع الفيديو المحمي (Cloudflare Stream)
+
+> بهذه الخطوة المدرب سيرفع الفيديو من لوحة الدورة مباشرة إلى Cloudflare، والطالب يشاهد عبر iframe موقَّع بتوكن قصير العمر — لا يستطيع أحد مشاركة الرابط. بدون هذه الإعدادات، الموقع يشتغل عادياً ويَقبل روابط YouTube/Vimeo/MP4 فقط.
+
+1. **فعّل Stream على حسابك:** https://dash.cloudflare.com → Stream → أضف بطاقة (Pay-as-you-go ~$1/1000 دقيقة تخزين + ~$1/1000 دقيقة مشاهدة).
+2. **أنشئ API Token:** https://dash.cloudflare.com/profile/api-tokens → Create Token → template **Stream: Edit**. احفظ القيمة → `CLOUDFLARE_STREAM_API_TOKEN`.
+3. **انسخ Account ID** من يمين أي صفحة Cloudflare → `CLOUDFLARE_ACCOUNT_ID`.
+4. **أنشئ signing key:**
+   ```bash
+   curl -X POST -H "Authorization: Bearer YOUR_STREAM_TOKEN" \
+     https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/stream/keys
+   ```
+   الناتج يعطيك `result.id` و `result.pem`:
+   - `result.id` → `CLOUDFLARE_STREAM_SIGNING_KEY_ID`
+   - `result.pem` → `CLOUDFLARE_STREAM_SIGNING_KEY_PEM` (يحتوي `-----BEGIN RSA PRIVATE KEY-----` وأسطر base64 متعددة — انسخه كما هو).
+5. **أنشئ customer subdomain:** ارفع أي فيديو اختبار من Cloudflare Stream Dashboard، ستجد رابط المعاينة يبدأ بـ `customer-XXXXXX.cloudflarestream.com` → انسخ الجزء الـ subdomain كاملاً → `CLOUDFLARE_STREAM_CUSTOMER_SUBDOMAIN`.
+6. **أضف الخمسة متغيرات على Vercel:** Settings → Environment Variables → أضف كلاً منها (Production + Preview + Development). ⚠️ عند لصق `CLOUDFLARE_STREAM_SIGNING_KEY_PEM` في واجهة Vercel، استخدم الحقل متعدد الأسطر (لا تحط علامتي تنصيص حوله).
+7. **Redeploy** — بعد الحفظ، أعد النشر من آخر deploy.
+8. **Test:** سجّل دخول كمدرب → حرّر دورة → جوار أي درس ستجد زر **"رفع فيديو"**. اختر ملف، سيُرفع مباشرة إلى Cloudflare وتظهر علامة **"فيديو محمي"** على الدرس. افتح الدرس كطالب مسجل → الفيديو يعمل داخل iframe. جرّب أن تنسخ رابط الـ iframe وتفتحه في نافذة بدون تسجيل دخول — سيعطي 403 بعد انتهاء التوكن (ساعتان افتراضياً).
+
+## 9. Going fully production — تحضيرات نهائية للإنتاج
 
 - **المدفوعات الحقيقية:** استبدل محاكاة الدفع بـ Moyasar.js tokenization — راجع `src/lib/moyasar.ts` و `src/app/checkout/page.tsx`. أضف مفاتيح Moyasar الحقيقية في Vercel ENV وفعّل webhook عند `/api/payments/webhook` (البنية جاهزة).
 - **الخط العربي للشهادات:** افتراضياً pdfkit لا يدعم العربية داخل الـ PDF. ارفع خط عربي مثل [Tajawal](https://fonts.google.com/specimen/Tajawal) إلى `public/fonts/Tajawal-Bold.ttf` ثم سجّله في `src/app/api/certificates/[id]/route.ts`:

@@ -133,7 +133,11 @@ model Lesson {
   id              String   @id @default(cuid())
   title           String
   description     String?
+  // videoProvider: "EXTERNAL" (videoUrl points to YouTube / Vimeo / raw MP4)
+  //             or "STREAM"   (videoUid is a Cloudflare Stream asset UID)
+  videoProvider   String   @default("EXTERNAL")
   videoUrl        String?
+  videoUid        String?
   content         String?
   durationMinutes Int      @default(0)
   order           Int      @default(0)

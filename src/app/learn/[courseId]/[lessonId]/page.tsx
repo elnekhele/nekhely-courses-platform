@@ -57,7 +57,15 @@ export default async function LearnPage({
           </Link>
         </div>
         <h1 className="font-display text-2xl font-bold mb-4">{lesson.title}</h1>
-        <LessonPlayer lesson={{ id: lesson.id, videoUrl: lesson.videoUrl, content: lesson.content }} />
+        <LessonPlayer
+          lesson={{
+            id: lesson.id,
+            videoProvider: lesson.videoProvider,
+            videoUrl: lesson.videoUrl,
+            videoUid: lesson.videoUid,
+            content: lesson.content,
+          }}
+        />
         <LessonFooter
           courseId={courseId}
           lessonId={lesson.id}

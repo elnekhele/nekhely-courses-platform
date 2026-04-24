@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/lib/toast";
 import { Plus, Trash2 } from "lucide-react";
+import { LessonVideoUpload } from "@/components/instructor/lesson-video-upload";
 
 type CourseData = {
   id: string;
@@ -33,6 +34,8 @@ type CourseData = {
       id: string;
       title: string;
       videoUrl: string | null;
+      videoProvider: string;
+      videoUid: string | null;
       durationMinutes: number;
       order: number;
       isPreview: boolean;
@@ -202,10 +205,22 @@ export function CourseEditor({
                 </div>
                 <ul className="divide-y">
                   {s.lessons.map((l) => (
-                    <li key={l.id} className="px-4 py-2 text-sm flex items-center justify-between">
-                      <span>{l.title}</span>
-                      <div className="flex items-center gap-3">
+                    <li key={l.id} className="px-4 py-2 text-sm flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="truncate">{l.title}</span>
+                        {l.videoProvider === "STREAM" ? (
+                          <Badge variant="success">فيديو محمي</Badge>
+                        ) : l.videoUrl ? (
+                          <Badge variant="secondary">رابط خارجي</Badge>
+                        ) : null}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
                         <span className="text-xs text-slate-500">{l.durationMinutes} د</span>
+                        <LessonVideoUpload
+                          lessonId={l.id}
+                          lessonTitle={l.title}
+                          currentProvider={l.videoProvider}
+                        />
                         <Button size="sm" variant="ghost" onClick={() => deleteLesson(l.id)}>
                           <Trash2 className="size-3.5 text-red-600" />
                         </Button>
