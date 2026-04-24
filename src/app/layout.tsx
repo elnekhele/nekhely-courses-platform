@@ -29,6 +29,11 @@ export const metadata: Metadata = {
     "منصة تعليمية عربية متخصصة في بيع الكورسات والدبلومات الاحترافية في التصميم والموشن جرافيك وصناعة المحتوى والذكاء الاصطناعي.",
 };
 
+// Most pages in this app depend on either the database (course catalog,
+// admin stats, cart) or the user session, so we render everything on
+// demand. This also avoids needing a DATABASE_URL at build time.
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: {

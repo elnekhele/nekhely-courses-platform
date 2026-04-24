@@ -4,6 +4,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// pdfkit reads font metric files from disk at runtime, which requires the
+// full Node.js runtime (not the Edge runtime).
+export const runtime = "nodejs";
+// Certificate PDFs are generated per request and must never be statically
+// cached.
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },

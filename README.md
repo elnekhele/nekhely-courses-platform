@@ -53,17 +53,24 @@
   `/checkout` لاستخدام Moyasar.js لتوكينة البطاقة ثم استدعِ `createPayment(...)`.
 - قابلة للتبديل إلى Paymob/HyperPay بتغيير الملف `moyasar.ts`.
 
-## التشغيل
+## التشغيل محلياً (تطوير)
+
+> المشروع يستخدم PostgreSQL في التطوير والإنتاج. أسهل طريقة محلياً هي إنشاء قاعدة Neon مجانية واستخدام نفس المتغيرات.
 
 ```bash
-# تثبيت التبعيات
+# ١. التبعيات
 npm install
 
-# إنشاء قاعدة البيانات وتعبئة بيانات تجريبية
-npm run db:migrate
+# ٢. انسخ .env.example إلى .env وعبّئ DATABASE_URL و NEXTAUTH_SECRET
+cp .env.example .env
+
+# ٣. أنشئ الجداول في قاعدتك (أول مرة فقط)
+npm run db:push
+
+# ٤. (اختياري) زرع بيانات تجريبية
 npm run db:seed
 
-# التشغيل
+# ٥. التشغيل
 npm run dev    # http://localhost:3000
 ```
 
@@ -98,11 +105,19 @@ prisma/
 انسخ `.env.example` إلى `.env` ثم عدّل:
 
 ```
-DATABASE_URL=file:./dev.db          # SQLite للتطوير، Postgres للإنتاج
-AUTH_SECRET=...                     # أي سلسلة عشوائية طويلة
-MOYASAR_PUBLISHABLE_KEY=...         # من لوحة Moyasar
-MOYASAR_SECRET_KEY=...              # من لوحة Moyasar
+DATABASE_URL=postgresql://user:pwd@host/db?sslmode=require   # Neon/Supabase
+DIRECT_URL=postgresql://user:pwd@host/db?sslmode=require     # Neon direct URL
+NEXTAUTH_SECRET=...                  # ولّد بـ openssl rand -base64 32
+NEXTAUTH_URL=http://localhost:3000   # في الإنتاج: https://yourdomain.com
+MOYASAR_PUBLISHABLE_KEY=...          # من لوحة Moyasar (اختياري)
+MOYASAR_SECRET_KEY=...               # من لوحة Moyasar (اختياري)
 ```
+
+## النشر للإنتاج 🚀
+
+دليل كامل خطوة بخطوة لنشر الموقع على **Vercel** مع قاعدة بيانات **Neon Postgres**:
+
+👉 **[DEPLOYMENT.md](./DEPLOYMENT.md)**
 
 ## الترخيص
 
