@@ -26,7 +26,9 @@ declare module "next-auth/jwt" {
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as NextAuthOptions["adapter"],
   session: { strategy: "jwt" },
-  secret: process.env.AUTH_SECRET,
+  // Support both NEXTAUTH_SECRET (NextAuth convention) and AUTH_SECRET
+  // (legacy). Either one works in development and production.
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
   pages: {
     signIn: "/login",
   },

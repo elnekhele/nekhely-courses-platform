@@ -7,11 +7,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-// SQLite doesn't support enums. Allowed values enforced at the app layer:
+// Enum-like fields are modelled as validated strings for portability.
 // Role: STUDENT | INSTRUCTOR | ADMIN
 // CourseLevel: BEGINNER | INTERMEDIATE | ADVANCED | ALL
 // OrderStatus: PENDING | PAID | FAILED | REFUNDED
